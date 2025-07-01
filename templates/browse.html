@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if item_type == 'search' %}Search Results{% else %}{{ item_type.title() }} Items{% endif %} - Lost & Found
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>
+                    {% if item_type == 'search' %}
+                        <i class="fas fa-search me-2"></i>Search Results
+                        {% if search_query %}
+                            for "{{ search_query }}"
+                        {% endif %}
+                    {% elif item_type == 'lost' %}
+                        <i class="fas fa-question-circle text-danger me-2"></i>Lost Items
+                    {% else %}
+                        <i class="fas fa-check-circle text-success me-2"></i>Found Items
+                    {% endif %}
+                </h1>
+                {% if item_type != 'search' %}
+                <a href="{{ url_for('post_item_form', item_type=item_type) }}" 
+                   class="btn btn-{{ 'danger' if item_type == 'lost' else 'success' }}">
+                    <i class="fas fa-plus me-2"></i>Post {{ item_type.title() }} Item
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    {% if item_type != 'search' %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="category" class="form-label">Category</label>
+                    <select name="category" id="category" class="form-select">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>
+                                {{ cat }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" name="location" id="location" class="form-control" 
+                           value="{{ current_location }}" placeholder="Filter by location">
+                </div>
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" name="search" id="search" class="form-control" 
+                           value="{{ current_search }}" placeholder="Search title, description...">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter me-2"></i>Apply Filters
+                    </button>
+                    <a href="{{ url_for('browse_items', item_type=item_type) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Results Count -->
+    <div class="mb-3">
+        <p class="text-muted">
+            {% if items %}
+                Showing {{ items|length }} item{{ 's' if items|length != 1 else '' }}
+            {% else %}
+                No items found
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Items Grid -->
+    {% if items %}
+    <div class="row">
+        {% for item in items %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                {% if item.image %}
+                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
+                     class="card-img-top" style="height: 250px; object-fit: cover;" 
+                     alt="{{ item.title }}">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <i class="fas fa-image text-muted fa-3x"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <!-- Item Type Badge -->
+                    <div class="mb-2">
+                        {% if item.type == 'lost' %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-question-circle me-1"></i>Lost
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle me-1"></i>Found
+                            </span>
+                        {% endif %}
+                        <span class="badge bg-secondary">{{ item.category }}</span>
+                    </div>
+                    
+                    <h5 class="card-title">{{ item.title }}</h5>
+                    <p class="card-text">{{ item.description[:120] }}{% if item.description|length > 120 %}...{% endif %}</p>
+                    
+                    <div class="mt-auto">
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ item.location }}
+                            </small>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>Posted: {{ item.date_posted[:10] }}
+                            </small>
+                        </div>
+                        {% if item.date_lost_found %}
+                        <div class="mb-2">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>{{ 'Lost' if item.type == 'lost' else 'Found' }}: {{ item.date_lost_found }}
+                            </small>
+                        </div>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('item_detail', item_id=item.id) }}" 
+                           class="btn btn-{{ 'danger' if item.type == 'lost' else 'success' }} w-100">
+                            <i class="fas fa-eye me-2"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <i class="fas fa-search text-muted fa-5x mb-4"></i>
+        {% if item_type == 'search' %}
+            <h3 class="text-muted">No search results found</h3>
+            <p class="text-muted mb-4">
+                {% if search_query %}
+                    No items match your search for "{{ search_query }}". Try different keywords or browse all items.
+                {% else %}
+                    Try searching for specific keywords or browse all items.
+                {% endif %}
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('browse_items', item_type='lost') }}" class="btn btn-danger">
+                    <i class="fas fa-question-circle me-2"></i>Browse Lost Items
+                </a>
+                <a href="{{ url_for('browse_items', item_type='found') }}" class="btn btn-success">
+                    <i class="fas fa-check-circle me-2"></i>Browse Found Items
+                </a>
+            </div>
+        {% else %}
+            <h3 class="text-muted">No {{ item_type }} items found</h3>
+            <p class="text-muted mb-4">
+                {% if current_category or current_location or current_search %}
+                    No items match your current filters. Try adjusting your search criteria.
+                {% else %}
+                    Be the first to post a {{ item_type }} item!
+                {% endif %}
+            </p>
+            {% if not (current_category or current_location or current_search) %}
+            <a href="{{ url_for('post_item_form', item_type=item_type) }}" 
+               class="btn btn-{{ 'danger' if item_type == 'lost' else 'success' }} btn-lg">
+                <i class="fas fa-plus me-2"></i>Post {{ item_type.title() }} Item
+            </a>
+            {% else %}
+            <a href="{{ url_for('browse_items', item_type=item_type) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-2"></i>Clear All Filters
+            </a>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

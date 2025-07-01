@@ -1,0 +1,218 @@
+/* Custom styles for Lost & Found application */
+
+body {
+    padding-top: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar customizations */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Image placeholder styling */
+.card-img-top {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.75em;
+}
+
+/* Button customizations */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Form styling */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Alert customizations */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* Footer styling */
+footer {
+    margin-top: auto;
+}
+
+/* Search form in navbar */
+.navbar .form-control {
+    min-width: 200px;
+}
+
+@media (max-width: 768px) {
+    .navbar .form-control {
+        min-width: auto;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .navbar .d-flex {
+        flex-direction: column;
+        width: 100%;
+    }
+}
+
+/* Item detail page */
+.item-detail-image {
+    max-height: 500px;
+    object-fit: contain;
+    width: 100%;
+}
+
+/* Loading states */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Empty state styling */
+.empty-state {
+    padding: 60px 20px;
+}
+
+.empty-state i {
+    opacity: 0.5;
+}
+
+/* Status badges */
+.badge.fs-6 {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Card equal heights */
+.card.h-100 {
+    display: flex;
+    flex-direction: column;
+}
+
+.card.h-100 .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card.h-100 .card-body .mt-auto {
+    margin-top: auto !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .card-img-top {
+        height: 200px !important;
+    }
+    
+    .btn-group-vertical .btn {
+        margin-bottom: 5px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .navbar, .btn, footer {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Accessibility improvements */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bs-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-dark);
+}
+
+/* Animation for flash messages */
+.alert {
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Image zoom on hover for item cards */
+.card-img-top {
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+/* Contact button styling */
+.contact-button {
+    position: sticky;
+    top: 20px;
+}
+
+/* Category filter styling */
+.category-filter .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* Dark theme adjustments */
+[data-bs-theme="dark"] .card-img-top {
+    border-bottom-color: var(--bs-border-color-translucent);
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: var(--bs-secondary) !important;
+}

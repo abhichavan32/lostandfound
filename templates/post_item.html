@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if editing %}Edit Item{% else %}Post {{ item_type.title() }} Item{% endif %} - Lost & Found
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">
+                        {% if editing %}
+                            <i class="fas fa-edit me-2"></i>Edit Item
+                        {% else %}
+                            {% if item_type == 'lost' %}
+                                <i class="fas fa-question-circle text-danger me-2"></i>Report Lost Item
+                            {% else %}
+                                <i class="fas fa-check-circle text-success me-2"></i>Report Found Item
+                            {% endif %}
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="itemForm">
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="title" class="form-label">Item Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       value="{{ item.title if editing else '' }}" 
+                                       placeholder="e.g., Black iPhone 13, Blue backpack, etc." required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="category" class="form-label">Category *</label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="">Select a category</option>
+                                    {% for cat in categories %}
+                                        <option value="{{ cat }}" {% if editing and item.category == cat %}selected{% endif %}>
+                                            {{ cat }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="location" class="form-label">Location *</label>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       value="{{ item.location if editing else '' }}" 
+                                       placeholder="Where was it lost/found?" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date_lost_found" class="form-label">
+                                    Date {{ 'Lost' if (not editing and item_type == 'lost') or (editing and item.type == 'lost') else 'Found' }}
+                                </label>
+                                <input type="date" class="form-control" id="date_lost_found" name="date_lost_found" 
+                                       value="{{ item.date_lost_found if editing else '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="image" class="form-label">Photo</label>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                                <div class="form-text">Upload a photo to help identify the item (max 16MB)</div>
+                                {% if editing and item.image %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">Current image: {{ item.image }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" 
+                                      placeholder="Provide detailed description including color, size, brand, distinctive features, etc." required>{{ item.description if editing else '' }}</textarea>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Contact Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="contact_name" class="form-label">Your Name *</label>
+                                        <input type="text" class="form-control" id="contact_name" name="contact_name" 
+                                               value="{{ item.contact_name if editing else '' }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="contact_email" class="form-label">Email Address *</label>
+                                        <input type="email" class="form-control" id="contact_email" name="contact_email" 
+                                               value="{{ item.contact_email if editing else '' }}" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="contact_phone" class="form-label">Phone Number (Optional)</label>
+                                        <input type="tel" class="form-control" id="contact_phone" name="contact_phone" 
+                                               value="{{ item.contact_phone if editing else '' }}" 
+                                               placeholder="+1 (555) 123-4567">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if editing %}
+                                    <i class="fas fa-save me-2"></i>Update Item
+                                {% else %}
+                                    <i class="fas fa-plus me-2"></i>Post Item
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form Validation Script -->
+<script>
+document.getElementById('itemForm').addEventListener('submit', function(e) {
+    const title = document.getElementById('title').value.trim();
+    const category = document.getElementById('category').value;
+    const location = document.getElementById('location').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const contactName = document.getElementById('contact_name').value.trim();
+    const contactEmail = document.getElementById('contact_email').value.trim();
+    
+    if (!title || !category || !location || !description || !contactName || !contactEmail) {
+        e.preventDefault();
+        alert('Please fill in all required fields.');
+        return false;
+    }
+    
+    if (description.length < 10) {
+        e.preventDefault();
+        alert('Please provide a more detailed description (at least 10 characters).');
+        return false;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(contactEmail)) {
+        e.preventDefault();
+        alert('Please enter a valid email address.');
+        return false;
+    }
+});
+
+// File size validation
+document.getElementById('image').addEventListener('change', function() {
+    const file = this.files[0];
+    if (file && file.size > 16 * 1024 * 1024) { // 16MB
+        alert('File size must be less than 16MB');
+        this.value = '';
+    }
+});
+</script>
+{% endblock %}
