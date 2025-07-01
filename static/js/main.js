@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFormValidation();
     initializeSearchFilters();
     initializeContactForm();
+    initializeCardAnimations();
+    initializeSmoothScrolling();
+    initializeAccessibility();
+    handleImageErrors();
 });
 
 // Initialize Bootstrap tooltips
@@ -234,16 +238,26 @@ function initializeCardAnimations() {
 
 // Initialize smooth scrolling for anchor links
 function initializeSmoothScrolling() {
-    const anchorLinks = document.querySelectorAll('a[href^="#"]');
+    const anchorLinks = document.querySelectorAll('a[href^="#"]:not([data-bs-toggle])');
     anchorLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            const href = this.getAttribute('href');
+            // Skip if href is just "#" or empty
+            if (!href || href === '#') {
+                return;
+            }
+            try {
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            } catch (error) {
+                // Invalid selector - ignore
+                console.warn('Invalid selector:', href);
             }
         });
     });

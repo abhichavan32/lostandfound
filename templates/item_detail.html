@@ -43,7 +43,7 @@
                         </div>
                         <div class="col-md-6">
                             <h6 class="text-muted mb-2">Date Posted</h6>
-                            <p><i class="fas fa-calendar text-primary me-2"></i>{{ item.date_posted[:10] }}</p>
+                            <p><i class="fas fa-calendar text-primary me-2"></i>{{ item.date_posted.strftime('%b %d, %Y') }}</p>
                         </div>
                         {% if item.date_lost_found %}
                         <div class="col-md-6">

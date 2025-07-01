@@ -100,6 +100,11 @@ def register():
             flash('Please fill in all required fields.', 'error')
             return render_template('auth/register.html')
         
+        # Ensure password is not None (for type checking)
+        if not password:
+            flash('Password is required.', 'error')
+            return render_template('auth/register.html')
+        
         # Check if user exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists.', 'error')
