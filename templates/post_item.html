@@ -79,31 +79,28 @@
                                       placeholder="Provide detailed description including color, size, brand, distinctive features, etc." required>{{ item.description if editing else '' }}</textarea>
                         </div>
 
-                        <!-- Contact Information -->
+                        <!-- User Information Display -->
                         <div class="card mt-4">
                             <div class="card-header">
-                                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Contact Information</h5>
+                                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Your Contact Information</h5>
                             </div>
                             <div class="card-body">
+                                <p class="text-muted mb-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Your contact information from your profile will be displayed to interested users.
+                                </p>
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="contact_name" class="form-label">Your Name *</label>
-                                        <input type="text" class="form-control" id="contact_name" name="contact_name" 
-                                               value="{{ item.contact_name if editing else '' }}" required>
+                                    <div class="col-md-6">
+                                        <strong>Name:</strong> {{ current_user.first_name }} {{ current_user.last_name }}
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="contact_email" class="form-label">Email Address *</label>
-                                        <input type="email" class="form-control" id="contact_email" name="contact_email" 
-                                               value="{{ item.contact_email if editing else '' }}" required>
+                                    <div class="col-md-6">
+                                        <strong>Email:</strong> {{ current_user.email }}
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="contact_phone" class="form-label">Phone Number (Optional)</label>
-                                        <input type="tel" class="form-control" id="contact_phone" name="contact_phone" 
-                                               value="{{ item.contact_phone if editing else '' }}" 
-                                               placeholder="+1 (555) 123-4567">
+                                    {% if current_user.phone %}
+                                    <div class="col-md-6 mt-2">
+                                        <strong>Phone:</strong> {{ current_user.phone }}
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

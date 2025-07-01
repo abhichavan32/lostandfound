@@ -82,37 +82,45 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Name</h6>
-                        <p class="mb-0">{{ item.contact_name }}</p>
+                        <p class="mb-0">{{ item.owner.first_name }} {{ item.owner.last_name }}</p>
                     </div>
                     
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Email</h6>
                         <p class="mb-0">
-                            <a href="mailto:{{ item.contact_email }}?subject=Regarding {{ item.type }} item: {{ item.title }}" 
+                            <a href="mailto:{{ item.owner.email }}?subject=Regarding {{ item.type }} item: {{ item.title }}" 
                                class="text-decoration-none">
-                                <i class="fas fa-envelope me-2"></i>{{ item.contact_email }}
+                                <i class="fas fa-envelope me-2"></i>{{ item.owner.email }}
                             </a>
                         </p>
                     </div>
                     
-                    {% if item.contact_phone %}
+                    {% if item.owner.phone %}
                     <div class="mb-3">
                         <h6 class="text-muted mb-1">Phone</h6>
                         <p class="mb-0">
-                            <a href="tel:{{ item.contact_phone }}" class="text-decoration-none">
-                                <i class="fas fa-phone me-2"></i>{{ item.contact_phone }}
+                            <a href="tel:{{ item.owner.phone }}" class="text-decoration-none">
+                                <i class="fas fa-phone me-2"></i>{{ item.owner.phone }}
                             </a>
                         </p>
                     </div>
                     {% endif %}
                     
                     <!-- Contact Button -->
+                    {% if current_user.is_authenticated and current_user.id != item.user_id %}
                     <div class="d-grid">
-                        <a href="mailto:{{ item.contact_email }}?subject=Regarding {{ item.type }} item: {{ item.title }}&body=Hi {{ item.contact_name }},%0D%0A%0D%0AI saw your {{ item.type }} item posting for '{{ item.title }}' and I think I might be able to help.%0D%0A%0D%0APlease let me know if this is still available.%0D%0A%0D%0AThank you!" 
+                        <a href="mailto:{{ item.owner.email }}?subject=Regarding {{ item.type }} item: {{ item.title }}&body=Hi {{ item.owner.first_name }},%0D%0A%0D%0AI saw your {{ item.type }} item posting for '{{ item.title }}' and I think I might be able to help.%0D%0A%0D%0APlease let me know if this is still available.%0D%0A%0D%0AThank you!" 
                            class="btn btn-{{ 'danger' if item.type == 'lost' else 'success' }} btn-lg">
                             <i class="fas fa-envelope me-2"></i>Contact Owner
                         </a>
                     </div>
+                    {% elif not current_user.is_authenticated %}
+                    <div class="d-grid">
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Contact
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             

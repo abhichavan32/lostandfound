@@ -95,7 +95,7 @@
                                     </small>
                                     <br>
                                     <small class="text-muted">
-                                        <i class="fas fa-calendar me-1"></i>{{ item.date_posted[:10] }}
+                                        <i class="fas fa-calendar me-1"></i>{{ item.date_posted.strftime('%b %d, %Y') }}
                                     </small>
                                 </div>
                                 <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-danger mt-2">View Details</a>
@@ -138,7 +138,7 @@
                                     </small>
                                     <br>
                                     <small class="text-muted">
-                                        <i class="fas fa-calendar me-1"></i>{{ item.date_posted[:10] }}
+                                        <i class="fas fa-calendar me-1"></i>{{ item.date_posted.strftime('%b %d, %Y') }}
                                     </small>
                                 </div>
                                 <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-success mt-2">View Details</a>

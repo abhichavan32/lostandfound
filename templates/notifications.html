@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - Lost & Found{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-bell me-2"></i>Notifications</h1>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="row">
+        <div class="col-12">
+            {% if notifications %}
+            <div class="card">
+                <div class="card-body">
+                    {% for notification in notifications %}
+                    <div class="d-flex align-items-start p-3 {% if not notification.is_read %}bg-light rounded mb-2{% else %}mb-3{% endif %} {% if not loop.last %}border-bottom{% endif %}">
+                        <div class="me-3">
+                            {% if notification.type == 'lost_item' %}
+                                <i class="fas fa-question-circle text-danger fa-lg"></i>
+                            {% elif notification.type == 'found_match' %}
+                                <i class="fas fa-check-circle text-success fa-lg"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle text-primary fa-lg"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="mb-0 {% if not notification.is_read %}fw-bold{% endif %}">
+                                    {{ notification.title }}
+                                </h6>
+                                <div class="d-flex align-items-center">
+                                    {% if not notification.is_read %}
+                                    <span class="badge bg-primary me-2">New</span>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        {{ notification.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <p class="mb-2 text-muted">{{ notification.message }}</p>
+                            
+                            <div class="d-flex gap-2">
+                                {% if notification.item %}
+                                <a href="{{ url_for('item_detail', item_id=notification.item.id) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>View Item
+                                </a>
+                                {% endif %}
+                                
+                                {% if not notification.is_read %}
+                                <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}" 
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-check me-1"></i>Mark as Read
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-bell-slash fa-5x text-muted mb-4"></i>
+                <h3 class="text-muted">No notifications yet</h3>
+                <p class="text-muted mb-4">You'll receive notifications when new lost items are posted or when there are potential matches for your items.</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{{ url_for('browse_items', item_type='lost') }}" class="btn btn-outline-danger">
+                        <i class="fas fa-question-circle me-2"></i>Browse Lost Items
+                    </a>
+                    <a href="{{ url_for('browse_items', item_type='found') }}" class="btn btn-outline-success">
+                        <i class="fas fa-check-circle me-2"></i>Browse Found Items
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

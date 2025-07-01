@@ -2,15 +2,17 @@
 
 ## Overview
 
-This is a Flask-based web application for managing lost and found items. The application allows users to report lost items, post found items, and search through listings to help reunite people with their belongings. The system uses in-memory storage for simplicity but is designed with future database integration in mind.
+This is a Flask-based web application for managing lost and found items with full user authentication and notification system. Users can register accounts, log in, and manage their personal lost and found items. The system automatically sends notifications to all users when new lost items are posted, helping to increase the chances of reuniting people with their belongings. The application uses PostgreSQL database for persistent storage and includes a comprehensive dashboard for users to manage their items and notifications.
 
 ## System Architecture
 
 ### Backend Architecture
 - **Framework**: Flask (Python web framework)
-- **Storage**: In-memory storage using Python lists (temporary solution)
+- **Database**: PostgreSQL with SQLAlchemy ORM
+- **Authentication**: Flask-Login with secure password hashing
 - **File Handling**: Local file system for image uploads
 - **Session Management**: Flask sessions with secret key configuration
+- **Notifications**: Automatic notification system for lost items
 - **Logging**: Built-in Python logging for debugging
 
 ### Frontend Architecture
@@ -47,11 +49,14 @@ This is a Flask-based web application for managing lost and found items. The app
 - **static/uploads/**: Directory for uploaded item images
 
 ### Core Features
-1. **Item Management**: Post, edit, and view lost/found items
-2. **Image Upload**: Support for PNG, JPG, JPEG, GIF, WebP files (16MB limit)
-3. **Categorization**: 11 predefined categories for item classification
-4. **Search & Filter**: Browse items by type, category, and search terms
-5. **Contact System**: Contact information collection for item coordination
+1. **User Authentication**: Complete registration, login, and profile management system
+2. **Item Management**: Post, edit, and view lost/found items with owner tracking
+3. **Notification System**: Automatic notifications when lost items are posted
+4. **User Dashboard**: Personal dashboard showing user's items and notifications
+5. **Image Upload**: Support for PNG, JPG, JPEG, GIF, WebP files (16MB limit)
+6. **Categorization**: 11 predefined categories for item classification
+7. **Search & Filter**: Browse items by type, category, and search terms
+8. **Contact System**: Integrated contact through user profiles
 
 ## Data Flow
 
