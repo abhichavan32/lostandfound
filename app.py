@@ -168,11 +168,15 @@ def logout():
 @login_required
 def dashboard():
     user_items = Item.query.filter_by(user_id=current_user.id).order_by(Item.date_posted.desc()).all()
+    lost_items = Item.query.filter_by(user_id=current_user.id, type='lost').all()
+    found_items = Item.query.filter_by(user_id=current_user.id, type='found').all()
     unread_notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
     recent_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(5).all()
     
     return render_template('dashboard.html', 
                          user_items=user_items,
+                         lost_items=lost_items,
+                         found_items=found_items,
                          unread_notifications=unread_notifications,
                          recent_notifications=recent_notifications)
 

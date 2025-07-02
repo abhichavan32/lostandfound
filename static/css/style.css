@@ -26,6 +26,55 @@ body {
     border-bottom: 1px solid var(--bs-border-color);
 }
 
+/* Dashboard specific styling */
+.bg-gradient {
+    background: linear-gradient(135deg, var(--bs-body-bg) 0%, rgba(var(--bs-primary-rgb), 0.1) 100%);
+}
+
+.bg-opacity-20 {
+    --bs-bg-opacity: 0.2;
+}
+
+/* Enhanced card styling for dashboard stats */
+.card.shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075) !important;
+    border: 1px solid rgba(var(--bs-border-color-rgb), 0.5);
+}
+
+.card.shadow-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+}
+
+/* Notification styling */
+.bg-light {
+    background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+
+/* Quick action buttons */
+.btn.w-100 {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+}
+
+/* Item grid improvements */
+.card h-100 {
+    border: 1px solid rgba(var(--bs-border-color-rgb), 0.3);
+}
+
+.card-body .btn-group {
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+/* Profile/user info styling */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 /* Badge styling */
 .badge {
     font-size: 0.75em;
