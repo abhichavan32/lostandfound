@@ -2,12 +2,12 @@ import os
 import logging
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import DeclarativeBase
 import uuid
+from config import get_config
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -15,19 +15,38 @@ logging.basicConfig(level=logging.DEBUG)
 class Base(DeclarativeBase):
     pass
 
-db = SQLAlchemy(model_class=Base)
+def create_app(config_name=None):
+    app = Flask(__name__)
+    
+    # Load configuration
+    if config_name is None:
+        config_name = os.environ.get('FLASK_ENV', 'development')
+    
+    app.config.from_object(get_config())
+    
+    # Import models and initialize db
+    from models import db, User, Item, Notification
+    db.init_app(app)
+    
+    # Flask-Login setup
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
+    login_manager.login_message = 'Please log in to access this page.'
+    
+    # Ensure upload directory exists
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    
+    # Register blueprints and routes
+    register_blueprints(app)
+    
+    return app
 
-app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
+# Create app instance
+app = create_app()
 
-# Database configuration
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-}
-
-# Initialize extensions
+# Import models and initialize db
+from models import db, User, Item, Notification
 db.init_app(app)
 
 # Flask-Login setup
@@ -52,9 +71,6 @@ CATEGORIES = [
     'Electronics', 'Clothing', 'Jewelry', 'Keys', 'Documents', 
     'Bags', 'Books', 'Pets', 'Vehicles', 'Sports Equipment', 'Other'
 ]
-
-# Import models after app initialization to avoid circular imports
-from models import User, Item, Notification
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -399,9 +415,55 @@ def search():
                          categories=CATEGORIES,
                          search_query=query)
 
-# Create database tables
-with app.app_context():
-    db.create_all()
+def register_blueprints(app):
+    """Register all blueprints and routes"""
+    # Import models and initialize db
+    from models import db, User, Item, Notification
+    
+    # Flask-Login setup
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'
+    login_manager.login_message = 'Please log in to access this page.'
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+    
+    # Categories for filtering
+    CATEGORIES = [
+        'Electronics', 'Clothing', 'Jewelry', 'Keys', 'Documents', 
+        'Bags', 'Books', 'Pets', 'Vehicles', 'Sports Equipment', 'Other'
+    ]
+    
+    def allowed_file(filename):
+        return '.' in filename and \
+               filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+    
+    def generate_item_id():
+        return str(uuid.uuid4())[:8]
+    
+    def create_notification_for_lost_item(item):
+        """Create notifications for all users when a lost item is posted"""
+        try:
+            users = User.query.filter(User.id != item.user_id).all()
+            for user in users:
+                notification = Notification(
+                    title=f"New Lost Item Posted: {item.title}",
+                    message=f"A new lost item '{item.title}' was posted in {item.location}. Check if you've found something similar!",
+                    type='lost_item',
+                    user_id=user.id,
+                    item_id=item.id
+                )
+                db.session.add(notification)
+            db.session.commit()
+        except Exception as e:
+            logging.error(f"Error creating notifications: {str(e)}")
+    
+    # All your existing routes go here...
+    # (I'll add them in the next step)
+    
+    return app
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

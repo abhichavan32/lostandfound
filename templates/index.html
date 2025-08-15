@@ -2,59 +2,89 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="bg-primary text-white py-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-3">Lost & Found</h1>
-                <p class="lead mb-4">Help reunite people with their lost belongings. Post what you've lost or found, and connect with others in your community.</p>
-                <div class="d-flex gap-3">
-                    <a href="{{ url_for('post_item_form', item_type='lost') }}" class="btn btn-light btn-lg">
+<section class="bg-primary text-white py-5 position-relative overflow-hidden">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><defs><pattern id=%22grain%22 width=%22100%22 height=%22100%22 patternUnits=%22userSpaceOnUse%22><circle cx=%2250%22 cy=%2250%22 r=%221%22 fill=%22rgba(255,255,255,0.1)%22/></pattern></defs><rect width=%22100%22 height=%22100%22 fill=%22url(%23grain)%22/></svg>'); opacity: 0.3;"></div>
+    <div class="container position-relative">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6 fade-in">
+                <h1 class="display-4 fw-bold mb-4 text-shadow">
+                    Lost & Found
+                </h1>
+                <p class="lead mb-4 fs-5 opacity-90">
+                    Help reunite people with their lost belongings. Post what you've lost or found, and connect with others in your community.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('post_item_form', item_type='lost') }}" class="btn btn-light btn-lg hover-lift">
                         <i class="fas fa-question-circle me-2"></i>Report Lost Item
                     </a>
-                    <a href="{{ url_for('post_item_form', item_type='found') }}" class="btn btn-outline-light btn-lg">
+                    <a href="{{ url_for('post_item_form', item_type='found') }}" class="btn btn-outline-light btn-lg hover-lift">
                         <i class="fas fa-check-circle me-2"></i>Report Found Item
                     </a>
                 </div>
             </div>
-            <div class="col-lg-6 text-center">
-                <i class="fas fa-search display-1 text-white-50"></i>
+            <div class="col-lg-6 text-center slide-in-right">
+                <div class="hero-icon-wrapper">
+                    <i class="fas fa-search display-1 text-white-50 mb-3"></i>
+                    <div class="floating-elements">
+                        <div class="floating-item" style="--delay: 0s;">
+                            <i class="fas fa-key text-warning"></i>
+                        </div>
+                        <div class="floating-item" style="--delay: 1s;">
+                            <i class="fas fa-mobile-alt text-info"></i>
+                        </div>
+                        <div class="floating-item" style="--delay: 2s;">
+                            <i class="fas fa-wallet text-success"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Quick Stats -->
-<section class="py-4 bg-light">
+<section class="py-5">
     <div class="container">
-        <div class="row text-center">
-            <div class="col-md-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fas fa-question-circle text-danger fa-2x mb-2"></i>
-                        <h5 class="card-title">Lost Items</h5>
-                        <p class="card-text">{{ recent_lost|length }} recent posts</p>
-                        <a href="{{ url_for('browse_items', item_type='lost') }}" class="btn btn-outline-danger">Browse Lost Items</a>
+        <div class="row text-center g-4">
+            <div class="col-md-4 slide-in-left" style="animation-delay: 0.2s;">
+                <div class="card border-0 glass hover-lift h-100">
+                    <div class="card-body p-4">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-question-circle text-danger fa-3x"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">Lost Items</h5>
+                        <p class="card-text text-muted mb-4">{{ recent_lost|length }} recent posts</p>
+                        <a href="{{ url_for('browse_items', item_type='lost') }}" class="btn btn-outline-danger w-100 hover-lift">
+                            Browse Lost Items
+                        </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                        <h5 class="card-title">Found Items</h5>
-                        <p class="card-text">{{ recent_found|length }} recent posts</p>
-                        <a href="{{ url_for('browse_items', item_type='found') }}" class="btn btn-outline-success">Browse Found Items</a>
+            <div class="col-md-4 fade-in" style="animation-delay: 0.4s;">
+                <div class="card border-0 glass hover-lift h-100">
+                    <div class="card-body p-4">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-check-circle text-success fa-3x"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">Found Items</h5>
+                        <p class="card-text text-muted mb-4">{{ recent_found|length }} recent posts</p>
+                        <a href="{{ url_for('browse_items', item_type='found') }}" class="btn btn-outline-success w-100 hover-lift">
+                            Browse Found Items
+                        </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fas fa-handshake text-info fa-2x mb-2"></i>
-                        <h5 class="card-title">Success Stories</h5>
-                        <p class="card-text">Items reunited daily</p>
-                        <a href="#how-it-works" class="btn btn-outline-info">Learn More</a>
+            <div class="col-md-4 slide-in-right" style="animation-delay: 0.6s;">
+                <div class="card border-0 glass hover-lift h-100">
+                    <div class="card-body p-4">
+                        <div class="icon-wrapper mb-3">
+                            <i class="fas fa-handshake text-info fa-3x"></i>
+                        </div>
+                        <h5 class="card-title fw-bold mb-3">Success Stories</h5>
+                        <p class="card-text text-muted mb-4">Items reunited daily</p>
+                        <a href="#how-it-works" class="btn btn-outline-info w-100 hover-lift">
+                            Learn More
+                        </a>
                     </div>
                 </div>
             </div>
@@ -67,38 +97,50 @@
     <div class="container">
         <!-- Recent Lost Items -->
         {% if recent_lost %}
-        <div class="row mb-5">
+        <div class="row mb-5 fade-in">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="text-danger"><i class="fas fa-question-circle me-2"></i>Recently Lost Items</h2>
-                    <a href="{{ url_for('browse_items', item_type='lost') }}" class="btn btn-outline-danger">View All</a>
+                    <h2 class="text-danger fw-bold">
+                        <i class="fas fa-question-circle me-2"></i>Recently Lost Items
+                    </h2>
+                    <a href="{{ url_for('browse_items', item_type='lost') }}" class="btn btn-outline-danger hover-lift">
+                        View All <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
                 </div>
-                <div class="row">
+                <div class="row g-4">
                     {% for item in recent_lost %}
                     <div class="col-md-4 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100 hover-lift">
                             {% if item.image %}
-                            <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
-                                 class="card-img-top" style="height: 200px; object-fit: cover;" 
-                                 alt="{{ item.title }}">
+                            <div class="image-container">
+                                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
+                                     class="card-img-top" 
+                                     alt="{{ item.title }}">
+                                <div class="image-overlay">
+                                    <span class="badge bg-danger">Lost</span>
+                                </div>
+                            </div>
                             {% else %}
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center placeholder-image">
                                 <i class="fas fa-image text-muted fa-3x"></i>
                             </div>
                             {% endif %}
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ item.title }}</h5>
-                                <p class="card-text">{{ item.description[:100] }}{% if item.description|length > 100 %}...{% endif %}</p>
+                                <h5 class="card-title fw-bold">{{ item.title }}</h5>
+                                <p class="card-text text-muted">{{ item.description[:100] }}{% if item.description|length > 100 %}...{% endif %}</p>
                                 <div class="mt-auto">
-                                    <small class="text-muted">
-                                        <i class="fas fa-map-marker-alt me-1"></i>{{ item.location }}
-                                    </small>
-                                    <br>
-                                    <small class="text-muted">
-                                        <i class="fas fa-calendar me-1"></i>{{ item.date_posted.strftime('%b %d, %Y') }}
-                                    </small>
+                                    <div class="item-meta mb-3">
+                                        <small class="text-muted d-block mb-1">
+                                            <i class="fas fa-map-marker-alt me-1 text-danger"></i>{{ item.location }}
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-calendar me-1 text-danger"></i>{{ item.date_posted.strftime('%b %d, %Y') }}
+                                        </small>
+                                    </div>
+                                    <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-danger w-100 hover-lift">
+                                        <i class="fas fa-eye me-2"></i>View Details
+                                    </a>
                                 </div>
-                                <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-danger mt-2">View Details</a>
                             </div>
                         </div>
                     </div>
@@ -110,38 +152,50 @@
 
         <!-- Recent Found Items -->
         {% if recent_found %}
-        <div class="row mb-5">
+        <div class="row mb-5 fade-in">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="text-success"><i class="fas fa-check-circle me-2"></i>Recently Found Items</h2>
-                    <a href="{{ url_for('browse_items', item_type='found') }}" class="btn btn-outline-success">View All</a>
+                    <h2 class="text-success fw-bold">
+                        <i class="fas fa-check-circle me-2"></i>Recently Found Items
+                    </h2>
+                    <a href="{{ url_for('browse_items', item_type='found') }}" class="btn btn-outline-success hover-lift">
+                        View All <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
                 </div>
-                <div class="row">
+                <div class="row g-4">
                     {% for item in recent_found %}
                     <div class="col-md-4 mb-4">
-                        <div class="card h-100">
+                        <div class="card h-100 hover-lift">
                             {% if item.image %}
-                            <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
-                                 class="card-img-top" style="height: 200px; object-fit: cover;" 
-                                 alt="{{ item.title }}">
+                            <div class="image-container">
+                                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
+                                     class="card-img-top" 
+                                     alt="{{ item.title }}">
+                                <div class="image-overlay">
+                                    <span class="badge bg-success">Found</span>
+                                </div>
+                            </div>
                             {% else %}
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center placeholder-image">
                                 <i class="fas fa-image text-muted fa-3x"></i>
                             </div>
                             {% endif %}
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ item.title }}</h5>
-                                <p class="card-text">{{ item.description[:100] }}{% if item.description|length > 100 %}...{% endif %}</p>
+                                <h5 class="card-title fw-bold">{{ item.title }}</h5>
+                                <p class="card-text text-muted">{{ item.description[:100] }}{% if item.description|length > 100 %}...{% endif %}</p>
                                 <div class="mt-auto">
-                                    <small class="text-muted">
-                                        <i class="fas fa-map-marker-alt me-1"></i>{{ item.location }}
-                                    </small>
-                                    <br>
-                                    <small class="text-muted">
-                                        <i class="fas fa-calendar me-1"></i>{{ item.date_posted.strftime('%b %d, %Y') }}
-                                    </small>
+                                    <div class="item-meta mb-3">
+                                        <small class="text-muted d-block mb-1">
+                                            <i class="fas fa-map-marker-alt me-1 text-success"></i>{{ item.location }}
+                                        </small>
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-calendar me-1 text-success"></i>{{ item.date_posted.strftime('%b %d, %Y') }}
+                                        </small>
+                                    </div>
+                                    <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-success w-100 hover-lift">
+                                        <i class="fas fa-eye me-2"></i>View Details
+                                    </a>
                                 </div>
-                                <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-success mt-2">View Details</a>
                             </div>
                         </div>
                     </div>
@@ -153,15 +207,17 @@
 
         <!-- Empty State -->
         {% if not recent_lost and not recent_found %}
-        <div class="text-center py-5">
-            <i class="fas fa-search text-muted fa-5x mb-4"></i>
-            <h3 class="text-muted">No items posted yet</h3>
-            <p class="text-muted mb-4">Be the first to post a lost or found item!</p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="{{ url_for('post_item_form', item_type='lost') }}" class="btn btn-danger btn-lg">
+        <div class="text-center py-5 empty-state fade-in">
+            <div class="empty-state-icon mb-4">
+                <i class="fas fa-search text-muted"></i>
+            </div>
+            <h3 class="text-muted fw-bold mb-3">No items posted yet</h3>
+            <p class="text-muted mb-4 fs-5">Be the first to post a lost or found item!</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{{ url_for('post_item_form', item_type='lost') }}" class="btn btn-danger btn-lg hover-lift">
                     <i class="fas fa-question-circle me-2"></i>Report Lost Item
                 </a>
-                <a href="{{ url_for('post_item_form', item_type='found') }}" class="btn btn-success btn-lg">
+                <a href="{{ url_for('post_item_form', item_type='found') }}" class="btn btn-success btn-lg hover-lift">
                     <i class="fas fa-check-circle me-2"></i>Report Found Item
                 </a>
             </div>
@@ -171,47 +227,201 @@
 </section>
 
 <!-- How It Works -->
-<section id="how-it-works" class="py-5 bg-light">
+<section id="how-it-works" class="py-5">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2>How It Works</h2>
-            <p class="lead">Simple steps to help reunite lost items with their owners</p>
+        <div class="text-center mb-5 fade-in">
+            <h2 class="fw-bold mb-3">How It Works</h2>
+            <p class="lead text-muted fs-5">Simple steps to help reunite lost items with their owners</p>
         </div>
-        <div class="row">
-            <div class="col-md-4 text-center mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
-                            <span class="fs-2 fw-bold">1</span>
+        <div class="row g-4">
+            <div class="col-md-4 text-center mb-4 slide-in-left" style="animation-delay: 0.2s;">
+                <div class="card border-0 glass hover-lift h-100">
+                    <div class="card-body p-4">
+                        <div class="step-number mb-4">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                                <span class="fs-2 fw-bold">1</span>
+                            </div>
                         </div>
-                        <h5>Post Your Item</h5>
-                        <p>Lost something? Found something? Post it with a detailed description and photo.</p>
+                        <h5 class="fw-bold mb-3">Post Your Item</h5>
+                        <p class="text-muted">Lost something? Found something? Post it with a detailed description and photo.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 text-center mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
-                            <span class="fs-2 fw-bold">2</span>
+            <div class="col-md-4 text-center mb-4 fade-in" style="animation-delay: 0.4s;">
+                <div class="card border-0 glass hover-lift h-100">
+                    <div class="card-body p-4">
+                        <div class="step-number mb-4">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                                <span class="fs-2 fw-bold">2</span>
+                            </div>
                         </div>
-                        <h5>Browse & Search</h5>
-                        <p>Look through posted items and use our search and filter features to find matches.</p>
+                        <h5 class="fw-bold mb-3">Browse & Search</h5>
+                        <p class="text-muted">Look through posted items and use our search and filter features to find matches.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 text-center mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
-                            <span class="fs-2 fw-bold">3</span>
+            <div class="col-md-4 text-center mb-4 slide-in-right" style="animation-delay: 0.6s;">
+                <div class="card border-0 glass hover-lift h-100">
+                    <div class="card-body p-4">
+                        <div class="step-number mb-4">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
+                                <span class="fs-2 fw-bold">3</span>
+                            </div>
                         </div>
-                        <h5>Connect & Reunite</h5>
-                        <p>Found a match? Contact the poster directly to arrange the return of the item.</p>
+                        <h5 class="fw-bold mb-3">Connect & Reunite</h5>
+                        <p class="text-muted">Found a match? Contact the poster directly to arrange the return of the item.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 fade-in">
+                <h2 class="fw-bold mb-4">Ready to Help Someone?</h2>
+                <p class="lead mb-4 opacity-90">Join our community and start helping people find their lost items today.</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg hover-lift">
+                        <i class="fas fa-user-plus me-2"></i>Get Started
+                    </a>
+                    <a href="{{ url_for('browse_items', item_type='lost') }}" class="btn btn-outline-light btn-lg hover-lift">
+                        <i class="fas fa-search me-2"></i>Browse Items
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Hero Section Enhancements */
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+.text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.opacity-90 {
+    opacity: 0.9;
+}
+
+/* Hero Icon Wrapper */
+.hero-icon-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.floating-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.floating-item {
+    position: absolute;
+    font-size: 2rem;
+    animation: float 3s ease-in-out infinite;
+    animation-delay: var(--delay);
+}
+
+.floating-item:nth-child(1) { top: 20%; left: 20%; }
+.floating-item:nth-child(2) { top: 60%; right: 20%; }
+.floating-item:nth-child(3) { bottom: 20%; left: 50%; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Icon Wrapper */
+.icon-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.icon-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+}
+
+/* Image Container */
+.image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.placeholder-image {
+    height: 200px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Item Meta */
+.item-meta {
+    padding: 0.75rem;
+    background: rgba(0,0,0,0.02);
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--bs-primary);
+}
+
+/* Empty State */
+.empty-state-icon {
+    font-size: 5rem;
+    opacity: 0.3;
+}
+
+/* Step Number */
+.step-number {
+    position: relative;
+}
+
+.step-number::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .min-vh-75 {
+        min-height: 60vh;
+    }
+    
+    .floating-item {
+        font-size: 1.5rem;
+    }
+    
+    .hero-icon-wrapper {
+        margin-top: 2rem;
+    }
+}
+</style>
 {% endblock %}
