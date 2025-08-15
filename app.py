@@ -15,35 +15,12 @@ logging.basicConfig(level=logging.DEBUG)
 class Base(DeclarativeBase):
     pass
 
-def create_app(config_name=None):
-    app = Flask(__name__)
-    
-    # Load configuration
-    if config_name is None:
-        config_name = os.environ.get('FLASK_ENV', 'development')
-    
-    app.config.from_object(get_config())
-    
-    # Import models and initialize db
-    from models import db, User, Item, Notification
-    db.init_app(app)
-    
-    # Flask-Login setup
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-    login_manager.login_view = 'login'
-    login_manager.login_message = 'Please log in to access this page.'
-    
-    # Ensure upload directory exists
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    
-    # Register blueprints and routes
-    register_blueprints(app)
-    
-    return app
+# Create Flask app
+app = Flask(__name__)
 
-# Create app instance
-app = create_app()
+# Load configuration
+config_name = os.environ.get('FLASK_ENV', 'development')
+app.config.from_object(get_config())
 
 # Import models and initialize db
 from models import db, User, Item, Notification
@@ -415,55 +392,7 @@ def search():
                          categories=CATEGORIES,
                          search_query=query)
 
-def register_blueprints(app):
-    """Register all blueprints and routes"""
-    # Import models and initialize db
-    from models import db, User, Item, Notification
-    
-    # Flask-Login setup
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-    login_manager.login_view = 'login'
-    login_manager.login_message = 'Please log in to access this page.'
-    
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
-    
-    # Categories for filtering
-    CATEGORIES = [
-        'Electronics', 'Clothing', 'Jewelry', 'Keys', 'Documents', 
-        'Bags', 'Books', 'Pets', 'Vehicles', 'Sports Equipment', 'Other'
-    ]
-    
-    def allowed_file(filename):
-        return '.' in filename and \
-               filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-    
-    def generate_item_id():
-        return str(uuid.uuid4())[:8]
-    
-    def create_notification_for_lost_item(item):
-        """Create notifications for all users when a lost item is posted"""
-        try:
-            users = User.query.filter(User.id != item.user_id).all()
-            for user in users:
-                notification = Notification(
-                    title=f"New Lost Item Posted: {item.title}",
-                    message=f"A new lost item '{item.title}' was posted in {item.location}. Check if you've found something similar!",
-                    type='lost_item',
-                    user_id=user.id,
-                    item_id=item.id
-                )
-                db.session.add(notification)
-            db.session.commit()
-        except Exception as e:
-            logging.error(f"Error creating notifications: {str(e)}")
-    
-    # All your existing routes go here...
-    # (I'll add them in the next step)
-    
-    return app
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
