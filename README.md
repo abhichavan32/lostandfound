@@ -66,4 +66,4 @@ You can customize the database connection using environment variables:
 ### Migration Notes
 - The application will automatically create all necessary tables when started
 - Backup any existing SQLite data before migration
-- For production, use environment variables for secure credentials
+- For production, use environment variables for secure credentials"# lost" 
