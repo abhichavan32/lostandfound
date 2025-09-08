@@ -560,3 +560,19 @@ footer {
     transform: scale(1.1);
     box-shadow: var(--shadow-xl);
 }
+
+/* Fix dropdown clipping/z-index issues */
+.navbar {
+    position: relative;
+    z-index: 1100;
+    overflow: visible;
+}
+
+.navbar .container,
+.navbar .navbar-collapse {
+    overflow: visible;
+}
+
+.navbar .dropdown-menu {
+    z-index: 2000;
+}

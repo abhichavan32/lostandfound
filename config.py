@@ -42,7 +42,7 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing configuration"""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres'
     WTF_CSRF_ENABLED = False
 
 # Configuration dictionary
