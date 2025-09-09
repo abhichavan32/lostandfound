@@ -33,7 +33,7 @@ if db_url and db_url.startswith("postgres://"):
 if db_url and "sslmode" not in db_url:
     db_url += "?sslmode=require"
 
-app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres?sslmode=require"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Import models and initialize db
