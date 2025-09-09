@@ -8,6 +8,8 @@ from werkzeug.utils import secure_filename
 from sqlalchemy.orm import DeclarativeBase
 import uuid
 from config import get_config
+from dotenv import load_dotenv
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
