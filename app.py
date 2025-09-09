@@ -22,9 +22,25 @@ app = Flask(__name__)
 config_name = os.environ.get('FLASK_ENV', 'development')
 app.config.from_object(get_config())
 
+# --- Database URL Fix for Supabase ---
+db_url = app.config.get("postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres") or os.getenv("DATABASE_URL")
+
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+if db_url and "sslmode" not in db_url:
+    db_url += "?sslmode=require"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 # Import models and initialize db
 from models import db, User, Item, Notification
 db.init_app(app)
+
+# Ensure tables are created automatically (optional)
+with app.app_context():
+    db.create_all()
 
 # Flask-Login setup
 login_manager = LoginManager()
@@ -45,7 +61,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Categories for filtering
 CATEGORIES = [
-    'Electronics', 'Clothing', 'Jewelry', 'Keys', 'Documents', 
+    'Electronics', 'Clothing', 'Jewelry', 'Keys', 'Documents',
     'Bags', 'Books', 'Pets', 'Vehicles', 'Sports Equipment', 'Other'
 ]
 
@@ -87,26 +103,25 @@ def register():
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         phone = request.form.get('phone')
-        
+
         # Validation
         if not all([username, email, password, first_name, last_name]):
             flash('Please fill in all required fields.', 'error')
             return render_template('auth/register.html')
-        
-        # Ensure password is not None (for type checking)
+
         if not password:
             flash('Password is required.', 'error')
             return render_template('auth/register.html')
-        
+
         # Check if user exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists.', 'error')
             return render_template('auth/register.html')
-        
+
         if User.query.filter_by(email=email).first():
             flash('Email already registered.', 'error')
             return render_template('auth/register.html')
-        
+
         # Create new user
         user = User(
             username=username,
@@ -116,7 +131,7 @@ def register():
             last_name=last_name,
             phone=phone
         )
-        
+
         try:
             db.session.add(user)
             db.session.commit()
@@ -126,7 +141,7 @@ def register():
             db.session.rollback()
             logging.error(f"Registration error: {str(e)}")
             flash('Registration failed. Please try again.', 'error')
-    
+
     return render_template('auth/register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -134,20 +149,20 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         if not username or not password:
             flash('Please enter both username and password.', 'error')
             return render_template('auth/login.html')
-        
+
         user = User.query.filter_by(username=username).first()
-        
+
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
             flash('Invalid username or password.', 'error')
-    
+
     return render_template('auth/login.html')
 
 @app.route('/logout')
@@ -165,8 +180,8 @@ def dashboard():
     found_items = Item.query.filter_by(user_id=current_user.id, type='found').all()
     unread_notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
     recent_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(5).all()
-    
-    return render_template('dashboard.html', 
+
+    return render_template('dashboard.html',
                          user_items=user_items,
                          lost_items=lost_items,
                          found_items=found_items,
@@ -192,9 +207,9 @@ def mark_notification_read(notification_id):
 def index():
     recent_lost = Item.query.filter_by(type='lost', status='active').order_by(Item.date_posted.desc()).limit(6).all()
     recent_found = Item.query.filter_by(type='found', status='active').order_by(Item.date_posted.desc()).limit(6).all()
-    
-    return render_template('index.html', 
-                         recent_lost=recent_lost, 
+
+    return render_template('index.html',
+                         recent_lost=recent_lost,
                          recent_found=recent_found)
 
 @app.route('/post/<item_type>')
@@ -203,7 +218,7 @@ def post_item_form(item_type):
     if item_type not in ['lost', 'found']:
         flash('Invalid item type', 'error')
         return redirect(url_for('index'))
-    
+
     return render_template('post_item.html', item_type=item_type, categories=CATEGORIES)
 
 @app.route('/post/<item_type>', methods=['POST'])
@@ -212,28 +227,24 @@ def post_item(item_type):
     if item_type not in ['lost', 'found']:
         flash('Invalid item type', 'error')
         return redirect(url_for('index'))
-    
+
     try:
-        # Validate required fields
         required_fields = ['title', 'description', 'category', 'location']
         for field in required_fields:
             if not request.form.get(field):
                 flash(f'{field.replace("_", " ").title()} is required', 'error')
                 return redirect(url_for('post_item_form', item_type=item_type))
-        
-        # Handle file upload
+
         image_filename = None
         if 'image' in request.files:
             file = request.files['image']
             if file and file.filename != '' and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                # Add timestamp to prevent filename conflicts
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
                 filename = timestamp + filename
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 image_filename = filename
-        
-        # Create item
+
         item = Item(
             id=generate_item_id(),
             type=item_type,
@@ -245,17 +256,16 @@ def post_item(item_type):
             image=image_filename,
             user_id=current_user.id
         )
-        
+
         db.session.add(item)
         db.session.commit()
-        
-        # Create notifications for lost items
+
         if item_type == 'lost':
             create_notification_for_lost_item(item)
-        
+
         flash(f'{item_type.title()} item posted successfully!', 'success')
         return redirect(url_for('item_detail', item_id=item.id))
-        
+
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error posting item: {str(e)}")
@@ -267,21 +277,19 @@ def browse_items(item_type):
     if item_type not in ['lost', 'found']:
         flash('Invalid item type', 'error')
         return redirect(url_for('index'))
-    
-    # Get filter parameters
+
     category = request.args.get('category', '')
     location = request.args.get('location', '')
     search = request.args.get('search', '')
-    
-    # Build query
+
     query = Item.query.filter_by(type=item_type, status='active')
-    
+
     if category:
         query = query.filter(Item.category == category)
-    
+
     if location:
         query = query.filter(Item.location.ilike(f'%{location}%'))
-    
+
     if search:
         query = query.filter(
             db.or_(
@@ -290,11 +298,11 @@ def browse_items(item_type):
                 Item.location.ilike(f'%{search}%')
             )
         )
-    
+
     items = query.order_by(Item.date_posted.desc()).all()
-    
-    return render_template('browse.html', 
-                         items=items, 
+
+    return render_template('browse.html',
+                         items=items,
                          item_type=item_type,
                          categories=CATEGORIES,
                          current_category=category,
@@ -316,16 +324,14 @@ def edit_item_form(item_id):
 @login_required
 def edit_item(item_id):
     item = Item.query.filter_by(id=item_id, user_id=current_user.id).first_or_404()
-    
+
     try:
-        # Validate required fields
         required_fields = ['title', 'description', 'category', 'location']
         for field in required_fields:
             if not request.form.get(field):
                 flash(f'{field.replace("_", " ").title()} is required', 'error')
                 return redirect(url_for('edit_item_form', item_id=item_id))
-        
-        # Handle file upload
+
         if 'image' in request.files:
             file = request.files['image']
             if file and file.filename != '' and allowed_file(file.filename):
@@ -334,19 +340,18 @@ def edit_item(item_id):
                 filename = timestamp + filename
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 item.image = filename
-        
-        # Update item
+
         item.title = request.form['title'].strip()
         item.description = request.form['description'].strip()
         item.category = request.form['category']
         item.location = request.form['location'].strip()
         item.date_lost_found = request.form.get('date_lost_found', '')
-        
+
         db.session.commit()
-        
+
         flash('Item updated successfully!', 'success')
         return redirect(url_for('item_detail', item_id=item_id))
-        
+
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error updating item: {str(e)}")
@@ -357,7 +362,7 @@ def edit_item(item_id):
 @login_required
 def delete_item(item_id):
     item = Item.query.filter_by(id=item_id, user_id=current_user.id).first_or_404()
-    
+
     try:
         db.session.delete(item)
         db.session.commit()
@@ -366,7 +371,7 @@ def delete_item(item_id):
         db.session.rollback()
         logging.error(f"Error deleting item: {str(e)}")
         flash('Error deleting item', 'error')
-    
+
     return redirect(url_for('dashboard'))
 
 @app.route('/search')
@@ -374,8 +379,7 @@ def search():
     query = request.args.get('q', '').strip()
     if not query:
         return redirect(url_for('index'))
-    
-    # Search through all active items
+
     items = Item.query.filter(
         Item.status == 'active',
         db.or_(
@@ -385,14 +389,12 @@ def search():
             Item.category.ilike(f'%{query}%')
         )
     ).order_by(Item.date_posted.desc()).all()
-    
-    return render_template('browse.html', 
-                         items=items, 
+
+    return render_template('browse.html',
+                         items=items,
                          item_type='search',
                          categories=CATEGORIES,
                          search_query=query)
-
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
