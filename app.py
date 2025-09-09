@@ -1,21 +1,28 @@
 import os
 import logging
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import DeclarativeBase
-import uuid
-from config import get_config
 from dotenv import load_dotenv
+import uuid
+
+# Import config + models
+from config import get_config
+from models import db, User, Item, Notification
+
+# --- Load environment variables ---
 load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
+
 class Base(DeclarativeBase):
     pass
+
 
 # Create Flask app
 app = Flask(__name__)
@@ -25,7 +32,7 @@ config_name = os.environ.get('FLASK_ENV', 'development')
 app.config.from_object(get_config())
 
 # --- Database URL Fix for Supabase ---
-db_url = app.config.get("postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres?sslmode=require") or os.getenv("postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres?sslmode=require")
+db_url = os.getenv("DATABASE_URL")
 
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
@@ -33,14 +40,16 @@ if db_url and db_url.startswith("postgres://"):
 if db_url and "sslmode" not in db_url:
     db_url += "?sslmode=require"
 
-app.config["postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres?sslmode=require"] = db_url
+if not db_url:
+    raise ValueError("❌ DATABASE_URL is not set. Please configure it in Render/Supabase.")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Import models and initialize db
-from models import db, User, Item, Notification
+# Init DB
 db.init_app(app)
 
-# Ensure tables are created automatically (optional)
+# Ensure tables exist
 with app.app_context():
     db.create_all()
 
@@ -50,15 +59,15 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Please log in to access this page.'
 
-# Configuration
+# Configuration for uploads
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
-# Ensure upload directory exists
+# Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Categories for filtering
@@ -67,16 +76,19 @@ CATEGORIES = [
     'Bags', 'Books', 'Pets', 'Vehicles', 'Sports Equipment', 'Other'
 ]
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def generate_item_id():
     return str(uuid.uuid4())[:8]
+
 
 def create_notification_for_lost_item(item):
     """Create notifications for all users when a lost item is posted"""
@@ -85,7 +97,7 @@ def create_notification_for_lost_item(item):
         for user in users:
             notification = Notification(
                 title=f"New Lost Item Posted: {item.title}",
-                message=f"A new lost item '{item.title}' was posted in {item.location}. Check if you've found something similar!",
+                message=f"A new lost item '{item.title}' was posted in {item.location}.",
                 type='lost_item',
                 user_id=user.id,
                 item_id=item.id
@@ -95,7 +107,11 @@ def create_notification_for_lost_item(item):
     except Exception as e:
         logging.error(f"Error creating notifications: {str(e)}")
 
-# Authentication routes
+
+# ===================
+# AUTH ROUTES
+# ===================
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -106,16 +122,10 @@ def register():
         last_name = request.form.get('last_name')
         phone = request.form.get('phone')
 
-        # Validation
         if not all([username, email, password, first_name, last_name]):
             flash('Please fill in all required fields.', 'error')
             return render_template('auth/register.html')
 
-        if not password:
-            flash('Password is required.', 'error')
-            return render_template('auth/register.html')
-
-        # Check if user exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists.', 'error')
             return render_template('auth/register.html')
@@ -124,7 +134,6 @@ def register():
             flash('Email already registered.', 'error')
             return render_template('auth/register.html')
 
-        # Create new user
         user = User(
             username=username,
             email=email,
@@ -146,6 +155,7 @@ def register():
 
     return render_template('auth/register.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -157,7 +167,6 @@ def login():
             return render_template('auth/login.html')
 
         user = User.query.filter_by(username=username).first()
-
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
             next_page = request.args.get('next')
@@ -167,12 +176,18 @@ def login():
 
     return render_template('auth/login.html')
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('You have been logged out successfully.', 'success')
     return redirect(url_for('index'))
+
+
+# ===================
+# DASHBOARD & NOTIFICATIONS
+# ===================
 
 @app.route('/dashboard')
 @login_required
@@ -181,20 +196,24 @@ def dashboard():
     lost_items = Item.query.filter_by(user_id=current_user.id, type='lost').all()
     found_items = Item.query.filter_by(user_id=current_user.id, type='found').all()
     unread_notifications = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
-    recent_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(5).all()
+    recent_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(
+        Notification.created_at.desc()).limit(5).all()
 
     return render_template('dashboard.html',
-                         user_items=user_items,
-                         lost_items=lost_items,
-                         found_items=found_items,
-                         unread_notifications=unread_notifications,
-                         recent_notifications=recent_notifications)
+                           user_items=user_items,
+                           lost_items=lost_items,
+                           found_items=found_items,
+                           unread_notifications=unread_notifications,
+                           recent_notifications=recent_notifications)
+
 
 @app.route('/notifications')
 @login_required
 def notifications():
-    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).all()
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(
+        Notification.created_at.desc()).all()
     return render_template('notifications.html', notifications=notifications)
+
 
 @app.route('/notifications/<int:notification_id>/mark_read')
 @login_required
@@ -204,15 +223,17 @@ def mark_notification_read(notification_id):
     db.session.commit()
     return redirect(url_for('notifications'))
 
-# Main application routes
+
+# ===================
+# MAIN ROUTES
+# ===================
+
 @app.route('/')
 def index():
     recent_lost = Item.query.filter_by(type='lost', status='active').order_by(Item.date_posted.desc()).limit(6).all()
     recent_found = Item.query.filter_by(type='found', status='active').order_by(Item.date_posted.desc()).limit(6).all()
+    return render_template('index.html', recent_lost=recent_lost, recent_found=recent_found)
 
-    return render_template('index.html',
-                         recent_lost=recent_lost,
-                         recent_found=recent_found)
 
 @app.route('/post/<item_type>')
 @login_required
@@ -220,8 +241,8 @@ def post_item_form(item_type):
     if item_type not in ['lost', 'found']:
         flash('Invalid item type', 'error')
         return redirect(url_for('index'))
-
     return render_template('post_item.html', item_type=item_type, categories=CATEGORIES)
+
 
 @app.route('/post/<item_type>', methods=['POST'])
 @login_required
@@ -274,6 +295,7 @@ def post_item(item_type):
         flash('An error occurred while posting the item. Please try again.', 'error')
         return redirect(url_for('post_item_form', item_type=item_type))
 
+
 @app.route('/browse/<item_type>')
 def browse_items(item_type):
     if item_type not in ['lost', 'found']:
@@ -288,10 +310,8 @@ def browse_items(item_type):
 
     if category:
         query = query.filter(Item.category == category)
-
     if location:
         query = query.filter(Item.location.ilike(f'%{location}%'))
-
     if search:
         query = query.filter(
             db.or_(
@@ -304,17 +324,19 @@ def browse_items(item_type):
     items = query.order_by(Item.date_posted.desc()).all()
 
     return render_template('browse.html',
-                         items=items,
-                         item_type=item_type,
-                         categories=CATEGORIES,
-                         current_category=category,
-                         current_location=location,
-                         current_search=search)
+                           items=items,
+                           item_type=item_type,
+                           categories=CATEGORIES,
+                           current_category=category,
+                           current_location=location,
+                           current_search=search)
+
 
 @app.route('/item/<item_id>')
 def item_detail(item_id):
     item = Item.query.get_or_404(item_id)
     return render_template('item_detail.html', item=item)
+
 
 @app.route('/item/<item_id>/edit')
 @login_required
@@ -322,11 +344,11 @@ def edit_item_form(item_id):
     item = Item.query.filter_by(id=item_id, user_id=current_user.id).first_or_404()
     return render_template('post_item.html', item=item, categories=CATEGORIES, editing=True)
 
+
 @app.route('/item/<item_id>/edit', methods=['POST'])
 @login_required
 def edit_item(item_id):
     item = Item.query.filter_by(id=item_id, user_id=current_user.id).first_or_404()
-
     try:
         required_fields = ['title', 'description', 'category', 'location']
         for field in required_fields:
@@ -360,11 +382,11 @@ def edit_item(item_id):
         flash('An error occurred while updating the item. Please try again.', 'error')
         return redirect(url_for('edit_item_form', item_id=item_id))
 
+
 @app.route('/item/<item_id>/delete', methods=['POST'])
 @login_required
 def delete_item(item_id):
     item = Item.query.filter_by(id=item_id, user_id=current_user.id).first_or_404()
-
     try:
         db.session.delete(item)
         db.session.commit()
@@ -375,6 +397,7 @@ def delete_item(item_id):
         flash('Error deleting item', 'error')
 
     return redirect(url_for('dashboard'))
+
 
 @app.route('/search')
 def search():
@@ -393,10 +416,15 @@ def search():
     ).order_by(Item.date_posted.desc()).all()
 
     return render_template('browse.html',
-                         items=items,
-                         item_type='search',
-                         categories=CATEGORIES,
-                         search_query=query)
+                           items=items,
+                           item_type='search',
+                           categories=CATEGORIES,
+                           search_query=query)
+
+
+# ===================
+# ENTRYPOINT
+# ===================
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
