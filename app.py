@@ -23,7 +23,7 @@ config_name = os.environ.get('FLASK_ENV', 'development')
 app.config.from_object(get_config())
 
 # --- Database URL Fix for Supabase ---
-db_url = app.config.get("postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres") or os.getenv("DATABASE_URL")
+db_url = app.config.get("postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres?sslmode=require") or os.getenv("postgresql://postgres:132639@db.pwtarudjugrsrajypoqr.supabase.co:5432/postgres?sslmode=require")
 
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
